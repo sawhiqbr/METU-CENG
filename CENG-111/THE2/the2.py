@@ -2,8 +2,6 @@ import math
 import random
 from evaluator import *    # get_data() will come from this import
 
-#[ M,  N,  D,  K, LAMBDA, MU,    universal_state]
-
 universal_state = get_data()[6]
 initial_data = get_data()
 
@@ -24,18 +22,16 @@ def new_move(): # calculates all the new moves and returns new universal state
 	for individiual in universal_state:
 		occupied_positions += [list(individiual[0])]
 
-	#print(occupied_positions)
-
-	for individiual in universal_state:
+	for individiual in universal_state: # calculates all individuals' new coordinates
 		last_move = individiual[1]
-		next_move = prob_move(last_move, probability_constant)
+		next_move = prob_move(last_move, probability_constant) # returns next move's direction as an integer
 		
 		individiual[1] = next_move
 
 		current_pos = list(individiual[0])
-		next_position = apply_move(next_move, current_pos)
+		next_position = apply_move(next_move, current_pos) # returns next position of an individual as a list
 		
-		if (next_position[0] < 0) or (next_position[1] < 0) or (next_position[0] >= columns) or (next_position[1] >= rows) or (next_position in occupied_positions):
+		if (next_position[0] < 0) or (next_position[1] < 0) or (next_position[0] >= columns) or (next_position[1] >= rows) or (next_position in occupied_positions): # if an individual is not able to move, makes its status the same as before
 			individiual[1] = last_move
 			next_position = current_pos
 		
@@ -46,25 +42,25 @@ def new_move(): # calculates all the new moves and returns new universal state
 		occupied_positions[index_of_ind] = next_position
 
 	universal_state = contamination(universal_state, ind_number, threshold, contamination_constant, mask_constant)
-	#print(universal_state)
+
 	return universal_state
 
 def prob_move(last_move, mu): # determine the next move of an individiual
-	G = mu/2
-	Y = mu/8
-	B = (1 - mu - mu**2)/2
-	P = (2*(mu**2))/5
-	Gy= (mu**2)/5
+	#mu: move probability constant
+	G = mu/2 #green
+	Y = mu/8 #yellow
+	B = (1 - mu - mu**2)/2 #blue
+	P = (2*(mu**2))/5 #purple
+	Gy= (mu**2)/5 #gray
 	prob_list = [G, Y, B, P, Gy, P, B, Y]
 	
-	direction = random.choices(["F", "FR", "R", "BR", "B", "BL", "L", "FL"], prob_list, k = 1) 
-	#print("RANDOM") # to be able to count random choices I made
+	direction = random.choices(["F", "FR", "R", "BR", "B", "BL", "L", "FL"], prob_list, k = 1)
+	
 	directions = ["F", "FR", "R", "BR", "B", "BL", "L", "FL"]
 	index_of_direction = directions.index(direction[0])
-	#print(prob_list)
-	#print(direction)
-	next_move_direction = (index_of_direction+last_move)%8  
-	#print(next_move_direction)
+
+	next_move_direction = (index_of_direction+last_move)%8
+	
 	return next_move_direction
 
 def apply_move(next_move, current_pos): # takes integer version of next_move and current position as arguments, calculates the next position; obeying specifications
@@ -95,13 +91,14 @@ def contamination(current_uni_state, inds, thres_const, cont_const, mask_const):
 	# thres_const: the threshold constant (D)
 	# cont_const: the contamination constant (K)
 	# mask_const: the constant used for masked individuals (lambda)
-	infected_list = []
-	for i in range(0, inds):
-		first_ind_mask = current_uni_state[i][2]
-		first_ind_inf = current_uni_state[i][3]
+	infected_list = [] # holds the list of infected individuals
+
+	for i in range(0, inds):                     # calculates if contamination occured between two individuals
+		first_ind_mask = current_uni_state[i][2] # mask condition of first ind.
+		first_ind_inf = current_uni_state[i][3]  # infection condition of first ind.
 		for j in range(i+1, inds):
-			second_ind_mask = current_uni_state[j][2]
-			second_ind_inf = current_uni_state[j][3]
+			second_ind_mask = current_uni_state[j][2] # mask condition of second ind.
+			second_ind_inf = current_uni_state[j][3] # infection condition of second ind.
 
 			distance = math.sqrt((current_uni_state[i][0][0] - current_uni_state[j][0][0])**2 + (current_uni_state[i][0][1] - current_uni_state[j][0][1])**2) 
 
@@ -119,11 +116,8 @@ def contamination(current_uni_state, inds, thres_const, cont_const, mask_const):
 				infect_prob = infect_prob/(mask_const)
 				
 			is_infectious = random.choices(["Infected", "Not infected"], [infect_prob, 1-infect_prob], k=1)
-			#print("RANDOM") #to be able to count random choices I made
-			#print(is_infectious)
+
 			if is_infectious[0] == "Infected":
-				#current_uni_state[i][3] = "infected"  # this is my old code
-				#current_uni_state[j][3] = "infected"  # can cause alteration in calculations
 				infected_list.append(i)
 				infected_list.append(j)
 				
