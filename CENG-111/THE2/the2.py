@@ -9,6 +9,7 @@ initial_data = get_data()
 
 def new_move(): # calculates all the new moves and returns new universal state
 	global initial_data
+	global universal_state
 	
 	rows = initial_data[0]
 	columns = initial_data[1]
@@ -17,7 +18,6 @@ def new_move(): # calculates all the new moves and returns new universal state
 	mask_constant = initial_data[4]
 	probability_constant = initial_data[5]
 	
-	global universal_state
 	ind_number = len(universal_state)
 
 	occupied_positions = []
@@ -36,6 +36,7 @@ def new_move(): # calculates all the new moves and returns new universal state
 		next_position = apply_move(next_move, current_pos)
 		
 		if (next_position[0] < 0) or (next_position[1] < 0) or (next_position[0] >= columns) or (next_position[1] >= rows) or (next_position in occupied_positions):
+			individiual[1] = last_move
 			next_position = current_pos
 		
 		individiual[0] = tuple(next_position)
@@ -45,7 +46,7 @@ def new_move(): # calculates all the new moves and returns new universal state
 		occupied_positions[index_of_ind] = next_position
 
 	universal_state = contamination(universal_state, ind_number, threshold, contamination_constant, mask_constant)
-	print(universal_state)
+	#print(universal_state)
 	return universal_state
 
 def prob_move(last_move, mu): # determine the next move of an individiual
@@ -60,9 +61,10 @@ def prob_move(last_move, mu): # determine the next move of an individiual
 	#print("RANDOM") # to be able to count random choices I made
 	directions = ["F", "FR", "R", "BR", "B", "BL", "L", "FL"]
 	index_of_direction = directions.index(direction[0])
-	
+	#print(prob_list)
+	#print(direction)
 	next_move_direction = (index_of_direction+last_move)%8  
-	
+	#print(next_move_direction)
 	return next_move_direction
 
 def apply_move(next_move, current_pos): # takes integer version of next_move and current position as arguments, calculates the next position; obeying specifications
